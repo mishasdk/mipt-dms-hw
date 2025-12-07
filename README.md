@@ -8,8 +8,15 @@
 
 1. Установить python зависимости из `requirements.txt`.
 
-2. Развернуть postgres базу данных с помощью docker контейнера:
+2. Развернуть базу данных на выбор с помощью docker контейнера:
+    - postgres
 
-```
-docker-compose up
-```
+    ```
+    docker-compose postgres up
+    ```
+
+    - MongoDB
+
+    ```
+    docker-compose mongo up
+    ```

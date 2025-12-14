@@ -1,3 +1,8 @@
 .venv
 .DS_Store
 mongo_data/
+
+hw_05/derby.log
+hw_05/spark-warehouse
+hw_05/spark-warehouse
+hw_05/metastore_db

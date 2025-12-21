@@ -1,6 +1,9 @@
 .venv
 .DS_Store
 mongo_data/
+__pycache__/
+logs/
+output/
 
 hw_05/derby.log
 hw_05/spark-warehouse

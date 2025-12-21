@@ -1,0 +1,68 @@
+version: "3.8"
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.8.1
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__SMTP__SMTP_HOST: mailhog
+    AIRFLOW__SMTP__SMTP_PORT: 1025
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: airflow-alerts@no-reply.com
+    AIRFLOW__SMTP__SMTP_STARTTLS: "false"
+    AIRFLOW__SMTP__SMTP_SSL: "false"
+  volumes:
+    # src
+    - ./airflow/src/dags:/opt/airflow/dags
+    - ./airflow/src/plugins:/opt/airflow/plugins
+    # other files
+    - ./airflow/sql:/opt/airflow/data/sql
+    - ./airflow/data_csv:/opt/airflow/data/data_csv
+    # logs and artifacts
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/output:/opt/airflow/data/output
+  depends_on:
+    - postgres
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: scheduler
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command: -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com"
+    restart: "no"
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  postgres-data:
